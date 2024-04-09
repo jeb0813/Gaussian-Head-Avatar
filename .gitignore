@@ -1,0 +1,11 @@
+/downloads/
+/lib/
+/log/
+/results/
+/checkpoints/
+/NeRSemble/
+
+/data
+/data_mead
+
+assets/tets_data.npz

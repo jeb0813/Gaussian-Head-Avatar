@@ -51,11 +51,12 @@ def extract_frames(id_list):
         camera_path = os.path.join(DATA_SOURCE, 'camera_params', id, 'camera_params.json')
         with open(camera_path, 'r') as f:
             camera = json.load(f)
-
+        
         fids = {}
         for camera_id in camera['world_2_cam'].keys():
             fids[camera_id] = 0
-            background_path = os.path.join(DATA_SOURCE, 'sequence_BACKGROUND_part-1', id, 'BACKGROUND', 'image_%s.jpg' % camera_id)
+            # background_path = os.path.join(DATA_SOURCE, 'sequence_BACKGROUND_part-1', id, 'BACKGROUND', 'image_%s.jpg' % camera_id)
+            background_path = os.path.join(DATA_SOURCE, 'participant_074', id, 'BACKGROUND', 'image_%s.jpg' % camera_id)
             background = cv2.imread(background_path)
             background, _ = CropImage(LEFT_UP, CROP_SIZE, background, None)
             background, _ = ResizeImage(SIZE, CROP_SIZE, background, None)
@@ -106,6 +107,6 @@ if __name__ == "__main__":
     CROP_SIZE = [2600, 2600]
     SIZE = [2048, 2048]
     SIZE_LOWRES = [256, 256]
-    DATA_SOURCE = 'path/to/raw_NeRSemble/'
+    DATA_SOURCE = '/data/chenziang/codes/Gaussian-Head-Avatar/data'
     DATA_OUTPUT = '../NeRSemble'
-    extract_frames(['031', '036'])
+    extract_frames(['074'])
