@@ -42,5 +42,5 @@ if __name__ == '__main__':
                                   {'params' : meshhead.exp_deform_mlp.parameters(), 'lr' : cfg.lr_net},
                                   {'params' : meshhead.pose_deform_mlp.parameters(), 'lr' : cfg.lr_net}])
     trainer = MeshHeadTrainer(dataloader, meshhead, camera, optimizer, recorder, cfg.gpu_id)
-    trainer.train(0, 50)
+    trainer.train(0, 5)
 

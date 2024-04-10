@@ -4,6 +4,9 @@
 /results/
 /checkpoints/
 /NeRSemble/
+/output/
+/output_demo/
+/Mead*/
 
 /data
 /data_mead

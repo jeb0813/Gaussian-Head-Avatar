@@ -1,6 +1,6 @@
 gpu_id: 0
-load_supres_checkpoint: 'checkpoints/gaussianhead_NeRSemble031/supres_latest'
-load_gaussianhead_checkpoint: 'checkpoints/gaussianhead_NeRSemble031/gaussianhead_latest'
+load_supres_checkpoint: 'output/checkpoints/gaussianhead_NeRSemble031/supres_latest'
+load_gaussianhead_checkpoint: 'output/checkpoints/gaussianhead_NeRSemble031/gaussianhead_latest'
 
 dataset:
   dataroot: '/data/chenziang/codes/Gaussian-Head-Avatar/downloads/mini_demo_dataset/031'
@@ -34,4 +34,4 @@ gaussianheadmodule:
 
 recorder:
   name: 'N031_to_N036_freeview'
-  result_path: 'results/reenactment'
+  result_path: 'output/results/reenactment'

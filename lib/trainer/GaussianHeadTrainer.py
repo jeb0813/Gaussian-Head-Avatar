@@ -18,7 +18,8 @@ class GaussianHeadTrainer():
         self.fn_lpips = lpips.LPIPS(net='vgg').to(self.device)
 
     def train(self, start_epoch=0, epochs=1):
-        for epoch in range(start_epoch, epochs):
+        progress_bar = tqdm(range(start_epoch, epochs))
+        for epoch in progress_bar:
             for idx, data in tqdm(enumerate(self.dataloader)):
                 
                 # prepare data
@@ -65,6 +66,10 @@ class GaussianHeadTrainer():
                                             (cropped_images * cropped_visibles)[:, :, left_up[0]:left_up[0]+512, left_up[1]:left_up[1]+512], normalize=True).mean()
                 loss = loss_rgb_hr + loss_rgb_lr + loss_vgg * 1e-1
 
+                # 更新进度条
+                progress_bar.set_postfix(loss=loss.item())
+
+
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
@@ -81,7 +86,9 @@ class GaussianHeadTrainer():
                     'iter' : idx + epoch * len(self.dataloader)
                 }
                 self.recorder.log(log)
-
+        
+        # 关闭进度条
+        progress_bar.close()
 
     def random_crop(self, render_images, images, visibles, scale_factor, resolution_coarse, resolution_fine):
         render_images_scaled = F.interpolate(render_images, scale_factor=scale_factor)

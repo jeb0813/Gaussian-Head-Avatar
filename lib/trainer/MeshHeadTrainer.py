@@ -44,8 +44,10 @@ class MeshHeadTrainer():
         self.device = torch.device('cuda:%d' % gpu_id)
 
     def train(self, start_epoch=0, epochs=1):
-        for epoch in range(start_epoch, epochs):
-            for idx, data in tqdm(enumerate(self.dataloader)):
+        progress_bar = tqdm(range(start_epoch, epochs))
+        for epoch in progress_bar:
+            # for idx, data in tqdm(enumerate(self.dataloader)):
+            for idx, data in enumerate(self.dataloader):
                 
                 # prepare data
                 to_cuda = ['images', 'masks', 'visibles', 'intrinsics', 'extrinsics', 'pose', 'scale', 'exp_coeff', 'landmarks_3d', 'exp_id']
@@ -94,7 +96,10 @@ class MeshHeadTrainer():
                     loss_lap += laplace_regularizer_const(verts_list[b], faces_list[b])
                 
                 loss = loss_rgb * 1e-1 + loss_sil * 1e-1 + loss_def * 1e0 + loss_offset * 1e-2 + loss_lmk * 1e-1 + loss_lap * 1e2
-
+                
+                # 更新进度条
+                progress_bar.set_postfix(loss=loss.item())
+                                        
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
@@ -112,3 +117,7 @@ class MeshHeadTrainer():
                     'iter' : idx + epoch * len(self.dataloader)
                 }
                 self.recorder.log(log)
+
+
+        # 关闭进度条
+        progress_bar.close()

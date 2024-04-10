@@ -85,8 +85,13 @@ def extract_frames(id_list):
                     if count % 3 != 0:
                         continue
                     visible = (np.ones_like(image) * 255).astype(np.uint8)
+                    # 打印原始image的size
+                    # print("raw",image.shape)
                     image, _ = CropImage(LEFT_UP, CROP_SIZE, image, None)
+                    # print("crop",image.shape)
                     image, _ = ResizeImage(SIZE, CROP_SIZE, image, None)
+                    # print("resize",image.shape)
+                    # exit()
                     visible, _ = CropImage(LEFT_UP, CROP_SIZE, visible, None)
                     visible, _ = ResizeImage(SIZE, CROP_SIZE, visible, None)
                     image_lowres = cv2.resize(image, SIZE_LOWRES)
