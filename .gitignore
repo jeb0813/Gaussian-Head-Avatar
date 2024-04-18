@@ -7,8 +7,10 @@
 /output/
 /output_demo/
 /Mead*/
+/*Mead/
 
 /data
 /data_mead
+/old_checkpoints/
 
 assets/tets_data.npz

@@ -1,5 +1,5 @@
 gpu_id: 0
-load_meshhead_checkpoint: 'output/checkpoints/meshhead_NeRSemble031/meshhead_latest'
+load_meshhead_checkpoint: 'output_demo/checkpoints/meshhead_NeRSemble031/meshhead_latest'
 lr_net: 1e-3
 lr_lmk: 1e-4
 batch_size: 1
@@ -27,8 +27,8 @@ meshheadmodule:
 
 recorder:
   name: 'meshhead_NeRSemble031'
-  logdir: 'output/log/meshhead_NeRSemble031'
-  checkpoint_path: 'output/checkpoints'
-  result_path: 'output/results'
+  logdir: 'output_demo/log/meshhead_NeRSemble031'
+  checkpoint_path: 'output_demo/checkpoints'
+  result_path: 'output_demo/results'
   save_freq: 1000
   show_freq: 100

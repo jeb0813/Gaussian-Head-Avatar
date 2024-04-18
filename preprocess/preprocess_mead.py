@@ -66,17 +66,19 @@ def extract_frames(id_list,emos=['neutral']):
 
         # TODO: all emos
         for emo in emos:
+            print("Processing %s %s" % (id, emo))
             if not os.path.exists(os.path.join(DATA_SOURCE, id, emo)):
                 continue
             video_folders = os.listdir(os.path.join(DATA_SOURCE, id, emo))
             video_folders.sort()
             for video_folder in video_folders:
+                print("Processing %s %s %s" % (id, emo, video_folder))
                 video_paths = os.listdir(os.path.join(DATA_SOURCE, id, emo, video_folder))
                 video_paths.sort()
 
                 for video_path in video_paths:
                     camera_id = video_path[4]
-                    extrinsic = np.array(camera['world_2_cam_RT'][camera_id][:3])
+                    extrinsic = np.array(camera['world_2_cam_RT_align'][camera_id][:3])
                     intrinsic = camera['intrinsics'][camera_id]
 
                     # 预处理intrinsics
@@ -86,7 +88,7 @@ def extract_frames(id_list,emos=['neutral']):
                     _, intrinsic = CropImage(LEFT_UP, CROP_SIZE, None, intrinsic)
                     _, intrinsic = ResizeImage(SIZE, CROP_SIZE, None, intrinsic)
                     
-                    cap = cv2.VideoCapture(os.path.join(DATA_SOURCE, id, video_folder, video_path))
+                    cap = cv2.VideoCapture(os.path.join(DATA_SOURCE, id, emo, video_folder, video_path))
                     count = -1
                     while(1): 
                         _, image = cap.read()
