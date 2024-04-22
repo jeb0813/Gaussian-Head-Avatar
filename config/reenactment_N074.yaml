@@ -3,12 +3,14 @@ load_supres_checkpoint: 'output/checkpoints/gaussianhead_NeRSemble074/supres_lat
 load_gaussianhead_checkpoint: 'output/checkpoints/gaussianhead_NeRSemble074/gaussianhead_latest'
 
 dataset:
-  dataroot: 'downloads/mini_demo_dataset/036'
+  dataroot: '/data/chenziang/codes/Gaussian-Head-Avatar/downloads/mini_demo_dataset/031'
   image_files: 'images/*/image_222200037.jpg'
   param_files: 'params/*/params.npz'
-  camera_path: 'NeRSemble/074/cameras/0000/camera_222200037.npz'
-  pose_code_path: 'NeRSemble/074/params/0000/params.npz'
-  freeview: True
+  # camera_path: 'mini_demo_dataset/031/cameras/0000/camera_222200037.npz'
+  camera_path: '/data/chenziang/codes/Gaussian-Head-Avatar/NeRSemble/074/cameras/0000/camera_222200037.npz'
+  pose_code_path: '/data/chenziang/codes/Gaussian-Head-Avatar/NeRSemble/074/params/0000/params.npz'
+  # freeview: True
+  freeview: False
   resolution: 2048
   original_resolution: 2048
 
@@ -33,5 +35,5 @@ gaussianheadmodule:
   attributes_scale: 0.2
 
 recorder:
-  name: 'N031_to_N074_freeview'
-  result_path: 'output/results/reenactment'
+  name: 'N031_to_N074'
+  result_path: 'output/results/reenactment_NeRSemble074'

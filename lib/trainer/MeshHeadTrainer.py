@@ -70,6 +70,8 @@ class MeshHeadTrainer():
                     'exp_coeff': data['exp_coeff'],
                     'query_pts': landmarks_3d_neutral
                 }
+
+                # 从中性形状中应用变形
                 deform_data = self.meshhead.deform(deform_data)
                 pred_landmarks_3d_can = deform_data['deformed_pts']
                 loss_def = F.mse_loss(pred_landmarks_3d_can, landmarks_3d_can)
@@ -86,7 +88,7 @@ class MeshHeadTrainer():
                 pose_deform = data['pose_deform']
                 verts_list = data['verts_list']
                 faces_list = data['faces_list']
-
+            
                 loss_rgb = F.l1_loss(render_images[:, :, :, :, 0:3] * visibles, images * visibles)
                 loss_sil = kaolin.metrics.render.mask_iou((render_soft_masks * visibles[:, :, :, :, 0]).view(-1, resolution, resolution), (masks * visibles).squeeze().view(-1, resolution, resolution))
                 loss_offset = (exp_deform ** 2).sum(-1).mean() + (pose_deform ** 2).sum(-1).mean()

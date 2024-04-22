@@ -62,6 +62,7 @@ class MeshDataset(Dataset):
         self.camera_ids = cfg.camera_ids
         self.original_resolution = cfg.original_resolution
         self.resolution = cfg.resolution
+        # lost in gaussianhead
         self.num_sample_view = cfg.num_sample_view
 
         self.samples = []
@@ -303,6 +304,7 @@ class ReenactmentDataset(Dataset):
     def __init__(self, cfg):
         super(ReenactmentDataset, self).__init__()
 
+        # source dataset
         self.dataroot = cfg.dataroot
         self.original_resolution = cfg.original_resolution
         self.resolution = cfg.resolution
@@ -313,17 +315,22 @@ class ReenactmentDataset(Dataset):
         self.Rot_z[1,1] = -1.0
 
         self.samples = []
+        # imgs to compare
         image_paths = sorted(glob.glob(os.path.join(self.dataroot, cfg.image_files)))
+        # params to drive
         param_paths = sorted(glob.glob(os.path.join(self.dataroot, cfg.param_files)))
         assert len(image_paths) == len(param_paths)
         
+    
         self.samples = []
         for i, image_path in enumerate(image_paths):
+            # not elegant
             param_path = param_paths[i]
             if os.path.exists(image_path) and os.path.exists(param_path):
                 sample = (image_path, param_path)
                 self.samples.append(sample)
 
+        # pose code from the subject to drive
         if os.path.exists(cfg.pose_code_path):
             self.pose_code = torch.from_numpy(np.load(cfg.pose_code_path)['pose'][0]).float()
         else:
@@ -336,6 +343,8 @@ class ReenactmentDataset(Dataset):
         self.intrinsic = torch.tensor([[self.original_resolution * 3.5,   0.0000e+00,                     self.original_resolution / 2],
                                        [0.0000e+00,                     self.original_resolution * 3.5,   self.original_resolution / 2],
                                        [0.0000e+00,                     0.0000e+00,                       1.0000e+00]]).float()
+        
+        # cam params
         if os.path.exists(cfg.camera_path):
             camera = np.load(cfg.camera_path)
             self.extrinsic = torch.from_numpy(camera['extrinsic']).float()
@@ -377,6 +386,7 @@ class ReenactmentDataset(Dataset):
         return data
     
     def __getitem__(self, index):
+        # 旋转更新相机位置
         if self.freeview:
             self.update_camera(index)
 
@@ -413,3 +423,100 @@ class ReenactmentDataset(Dataset):
 
     def __len__(self):
         return len(self.samples)
+    
+
+class MyGaussianDataset(GaussianDataset):
+    """
+    DataLoader for no superesolution training
+    """
+
+    def __init__(self, cfg):
+        super(MyGaussianDataset, self).__init__(cfg)
+    
+    def __getitem__(self, index):
+        sample = self.samples[index]
+        
+        view = random.sample(range(len(self.camera_ids)), 1)[0]
+
+        image_path = sample[0][view]
+        image = cv2.resize(io.imread(image_path), (self.original_resolution, self.original_resolution)) / 255
+        mask_path = sample[1][view]
+        mask = cv2.resize(io.imread(mask_path), (self.original_resolution, self.original_resolution))[:, :, 0:1] / 255
+        image = image * mask + (1 - mask)
+
+        visible_path = sample[2][view]
+        if os.path.exists(visible_path):
+            visible = cv2.resize(io.imread(visible_path), (self.original_resolution, self.original_resolution))[:, :, 0:1] / 255
+        else:
+            visible = np.ones_like(image)
+
+        camera = np.load(sample[3][view])
+        extrinsic = torch.from_numpy(camera['extrinsic']).float()
+        R = extrinsic[:3,:3].t()
+        T = extrinsic[:3, 3]
+
+        intrinsic = camera['intrinsic']
+        if np.abs(intrinsic[0, 2] - self.original_resolution / 2) > 1 or np.abs(intrinsic[1, 2] - self.original_resolution / 2) > 1:
+            left_up = np.around(intrinsic[0:2, 2] - np.array([self.original_resolution / 2, self.original_resolution / 2])).astype(np.int32)
+            _, intrinsic = CropImage(left_up, (self.original_resolution, self.original_resolution), K=intrinsic)
+            image, _ = CropImage(left_up, (self.original_resolution, self.original_resolution), image=image)
+            mask, _ = CropImage(left_up, (self.original_resolution, self.original_resolution), image=mask)
+            visible, _ = CropImage(left_up, (self.original_resolution, self.original_resolution), image=visible)
+
+        intrinsic[0, 0] = intrinsic[0, 0] * 2 / self.original_resolution
+        intrinsic[0, 2] = intrinsic[0, 2] * 2 / self.original_resolution - 1
+        intrinsic[1, 1] = intrinsic[1, 1] * 2 / self.original_resolution
+        intrinsic[1, 2] = intrinsic[1, 2] * 2 / self.original_resolution - 1
+        intrinsic = torch.from_numpy(intrinsic).float()
+
+
+        # 这里是做变换的地方
+        image = torch.from_numpy(cv2.resize(image, (self.resolution, self.resolution))).permute(2, 0, 1).float()
+        mask = torch.from_numpy(cv2.resize(mask, (self.resolution, self.resolution)))[None].float()
+        visible = torch.from_numpy(cv2.resize(visible, (self.resolution, self.resolution)))[None].float()
+        # image_coarse = F.interpolate(image[None], scale_factor=0.25)[0]
+        # mask_coarse = F.interpolate(mask[None], scale_factor=0.25)[0]
+        # visible_coarse = F.interpolate(visible[None], scale_factor=0.25)[0]
+
+        fovx = 2 * math.atan(1 / intrinsic[0, 0])
+        fovy = 2 * math.atan(1 / intrinsic[1, 1])
+
+        world_view_transform = torch.tensor(getWorld2View2(R.numpy(), T.numpy())).transpose(0, 1)
+        projection_matrix = getProjectionMatrix(znear=0.01, zfar=100, fovX=fovx, fovY=fovy).transpose(0,1)
+        full_proj_transform = (world_view_transform.unsqueeze(0).bmm(projection_matrix.unsqueeze(0))).squeeze(0)
+        camera_center = world_view_transform.inverse()[3, :3]
+
+        param_path = sample[4]
+        param = np.load(param_path)
+        pose = torch.from_numpy(param['pose'][0]).float()
+        scale = torch.from_numpy(param['scale']).float()
+        exp_coeff = torch.from_numpy(param['exp_coeff'][0]).float()
+        
+        landmarks_3d_path = sample[5]
+        landmarks_3d = torch.from_numpy(np.load(landmarks_3d_path)).float()
+        vertices_path = sample[6]
+        vertices = torch.from_numpy(np.load(vertices_path)).float()
+        landmarks_3d = torch.cat([landmarks_3d, vertices[::100]], 0)
+        
+        exp_id = torch.tensor(sample[7]).long()
+
+        return {
+                'images': image,
+                'masks': mask,
+                'visibles': visible,
+                # 'images_coarse': image_coarse,
+                # 'masks_coarse': mask_coarse,
+                # 'visibles_coarse': visible_coarse,
+                'pose': pose,
+                'scale': scale,
+                'exp_coeff': exp_coeff,
+                'landmarks_3d': landmarks_3d,
+                'exp_id': exp_id,
+                'extrinsics': extrinsic,
+                'intrinsics': intrinsic,
+                'fovx': fovx,
+                'fovy': fovy,
+                'world_view_transform': world_view_transform,
+                'projection_matrix': projection_matrix,
+                'full_proj_transform': full_proj_transform,
+                'camera_center': camera_center}

@@ -14,13 +14,17 @@ from lib.utils.dmtet_utils import marching_tetrahedra
 class MeshHeadModule(nn.Module):
     def __init__(self, cfg, init_landmarks_3d_neutral):
         super(MeshHeadModule, self).__init__()
-        
+        # f_sdf?
         self.geo_mlp = MLP(cfg.geo_mlp, last_op=nn.Tanh())
+        # f_col_exp
         self.exp_color_mlp = MLP(cfg.exp_color_mlp, last_op=nn.Sigmoid())
+        # f_col_pose
         self.pose_color_mlp = MLP(cfg.pose_color_mlp, last_op=nn.Sigmoid())
+        # f_def_exp
         self.exp_deform_mlp = MLP(cfg.exp_deform_mlp, last_op=nn.Tanh())
+        # f_def_pose
         self.pose_deform_mlp = MLP(cfg.pose_deform_mlp, last_op=nn.Tanh())
-
+        # 第一帧的lmk_3d.npy
         self.landmarks_3d_neutral = nn.Parameter(init_landmarks_3d_neutral)
 
         self.pos_embedding, _ = get_embedder(cfg.pos_freq)
@@ -29,7 +33,7 @@ class MeshHeadModule(nn.Module):
         self.dist_threshold_near = cfg.dist_threshold_near
         self.dist_threshold_far = cfg.dist_threshold_far
         self.deform_scale = cfg.deform_scale
-
+        # https://github.com/YuelangX/Gaussian-Head-Avatar/issues/12
         tets_data = np.load('assets/tets_data.npz')
         self.register_buffer('tet_verts', torch.from_numpy(tets_data['tet_verts']))
         self.register_buffer('tets', torch.from_numpy(tets_data['tets']))

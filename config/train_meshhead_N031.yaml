@@ -31,4 +31,4 @@ recorder:
   checkpoint_path: 'output_demo/checkpoints'
   result_path: 'output_demo/results'
   save_freq: 1000
-  show_freq: 100
+  show_freq: 1000
