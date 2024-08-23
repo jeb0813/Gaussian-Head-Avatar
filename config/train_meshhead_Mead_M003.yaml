@@ -1,0 +1,33 @@
+gpu_id: 0
+load_meshhead_checkpoint: 'output_mead/checkpoints/meshhead_M003/meshhead_latest'
+lr_net: 1e-3
+lr_lmk: 1e-4
+batch_size: 1
+
+dataset:
+  dataroot: '/data/chenziang/codes/Gaussian-Head-Avatar/MEAD_MONO/M003/neutral/level_1'
+  camera_ids: ['2']
+  original_resolution: 1080
+  resolution: 256
+  num_sample_view: 1
+
+meshheadmodule:
+  geo_mlp: [27, 256, 256, 256, 256, 256, 132]
+  exp_color_mlp: [192, 256, 256, 32]
+  pose_color_mlp: [182, 128, 32]
+  exp_deform_mlp: [91, 256, 256, 256, 256, 256, 3]
+  pose_deform_mlp: [81, 256, 256, 3]
+  pos_freq: 4
+  model_bbox: [[-1.6, 1.6], [-1.7, 1.8], [-2.5, 1.0]]
+  dist_threshold_near: 0.1
+  dist_threshold_far: 0.25
+  deform_scale: 0.3
+  subdivide: False
+
+recorder:
+  name: 'meshhead_M003'
+  logdir: 'output_mead/log/meshhead_M003'
+  checkpoint_path: 'output_mead/checkpoints'
+  result_path: 'output_mead/results'
+  save_freq: 1000
+  show_freq: 1000

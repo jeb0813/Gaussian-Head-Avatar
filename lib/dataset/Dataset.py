@@ -56,6 +56,8 @@ def ResizeImage(target_size, source_size, image=None, K=None):
 class MeshDataset(Dataset):
 
     def __init__(self, cfg):
+        # import ipdb
+        # ipdb.set_trace()
         super(MeshDataset, self).__init__()
 
         self.dataroot = cfg.dataroot
@@ -103,6 +105,8 @@ class MeshDataset(Dataset):
         return data
     
     def __getitem__(self, index):
+        import ipdb
+        # ipdb.set_trace()
         sample = self.samples[index]
         
         images = []
@@ -177,7 +181,7 @@ class GaussianDataset(Dataset):
 
     def __init__(self, cfg):
         super(GaussianDataset, self).__init__()
-
+        self.cfg = cfg
         self.dataroot = cfg.dataroot
         self.camera_ids = cfg.camera_ids
         self.original_resolution = cfg.original_resolution

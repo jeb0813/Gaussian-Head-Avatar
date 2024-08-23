@@ -37,3 +37,14 @@ CUDA_VISIBLE_DEVICES=1 python my_train_gaussianhead.py --config config/train_gau
 这里严格遵循了5epoch
 CUDA_VISIBLE_DEVICES=2 python train_meshhead.py --config config/train_meshhead_N074.yaml
 CUDA_VISIBLE_DEVICES=2 python train_gaussianhead.py --config config/train_gaussianhead_N074.yaml
+
+
+# 2024/04/23
+在mead上开始训练
+CUDA_VISIBLE_DEVICES=2 python train_meshhead.py --config config/train_meshhead_Mead_M003.yaml
+
+CUDA_VISIBLE_DEVICES=3 python train_gaussianhead.py --config config/train_gaussianhead_Mead_M003.yaml
+
+ffmpeg -r 25 -f image2 -s 1920x1080 -i %06d.jpg -vcodec libx264 -crf 25 -pix_fmt yuv420p output.mp4
+
+

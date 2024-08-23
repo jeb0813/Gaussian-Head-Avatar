@@ -1,0 +1,39 @@
+gpu_id: 0
+load_gaussianhead_checkpoint: 'output_mead/checkpoints/gaussianhead_M003/gaussianhead_latest'
+load_supres_checkpoint: 'output_mead/checkpoints/gaussianhead_M003/supres_latest'
+
+dataset:
+  dataroot: '/data/chenziang/codes/Gaussian-Head-Avatar/MEAD_MONO/M003_450p'
+  image_files: 'images/*/image_2.jpg'
+  param_files: 'params/*/params.npz'
+  # camera_path: 'mini_demo_dataset/031/cameras/0000/camera_222200037.npz'
+  camera_path: '/data/chenziang/codes/Gaussian-Head-Avatar/MEAD_MONO/M003/neutral/level_1/cameras/0000/camera_2.npz'
+  pose_code_path: '/data/chenziang/codes/Gaussian-Head-Avatar/MEAD_MONO/M003/neutral/level_1/params/0000/params.npz'
+  # freeview: True
+  freeview: False
+  resolution: 1080
+  original_resolution: 1080
+
+supresmodule:
+  input_dim: 32
+  output_dim: 3
+  network_capacity: 32
+
+gaussianheadmodule:
+  num_add_mouth_points: 3000
+  exp_color_mlp: [192, 256, 256, 32]
+  pose_color_mlp: [182, 128, 32]
+  exp_deform_mlp: [91, 256, 256, 256, 256, 256, 3]
+  pose_deform_mlp: [81, 256, 256, 3]
+  exp_attributes_mlp: [192, 256, 256, 256, 8]
+  pose_attributes_mlp: [182, 128, 128, 8]
+  exp_coeffs_dim: 64
+  pos_freq: 4
+  dist_threshold_near: 0.1
+  dist_threshold_far: 0.25
+  deform_scale: 0.3
+  attributes_scale: 0.2
+
+recorder:
+  name: 'M003_to_M003_450p'
+  result_path: 'output_mead/results/reenactment_M003'

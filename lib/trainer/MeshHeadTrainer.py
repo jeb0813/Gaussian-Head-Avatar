@@ -9,6 +9,7 @@ from pytorch3d.transforms import so3_exponential_map
 from kaolin.ops.mesh import index_vertices_by_faces
 from kaolin.metrics.trianglemesh import point_to_mesh_distance
 
+import ipdb
 
 def laplace_regularizer_const(mesh_verts, mesh_faces):
     term = torch.zeros_like(mesh_verts)
@@ -48,7 +49,8 @@ class MeshHeadTrainer():
         for epoch in progress_bar:
             # for idx, data in tqdm(enumerate(self.dataloader)):
             for idx, data in enumerate(self.dataloader):
-                
+                # import ipdb
+                # ipdb.set_trace()
                 # prepare data
                 to_cuda = ['images', 'masks', 'visibles', 'intrinsics', 'extrinsics', 'pose', 'scale', 'exp_coeff', 'landmarks_3d', 'exp_id']
                 for data_item in to_cuda:
@@ -59,6 +61,7 @@ class MeshHeadTrainer():
                 visibles = data['visibles'].permute(0, 1, 3, 4, 2)
                 resolution = images.shape[2]
 
+                # ipdb.set_trace()
                 R = so3_exponential_map(data['pose'][:, :3])
                 T = data['pose'][:, 3:, None]
                 S = data['scale'][:, :, None]
